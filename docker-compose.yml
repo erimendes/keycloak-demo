@@ -24,6 +24,9 @@ services:
       - ./proxy-manager/letsencrypt:/etc/letsencrypt
     depends_on:
       - npm-db
+    networks:
+      - npm-network
+      - npm-internal
   
   npm-db:
     image: 'mariadb:latest'
@@ -36,6 +39,8 @@ services:
       MYSQL_PASSWORD: ${DB_MYSQL_PASSWORD}
     volumes:
       - ./npm-data/mysql:/var/lib/mysql:Z
+    networks:
+      - npm-internal
 
   keycloak:
     image: quay.io/keycloak/keycloak:21.0.1
@@ -55,6 +60,8 @@ services:
     volumes:
       - ./keycloak:/opt/keycloak/config
     command: [ "start-dev"]
+    networks:
+      - npm-internal
 
   red:
     image: nginx:stable-alpine
@@ -62,6 +69,8 @@ services:
     volumes:
       - ./nginx/red.html:/usr/share/nginx/html/index.html
     command: [nginx-debug, '-g', 'daemon off;']
+    networks:
+      - npm-internal
 
   blue:
     image: nginx:stable-alpine
@@ -69,6 +78,8 @@ services:
     volumes:
       - ./nginx/blue.html:/usr/share/nginx/html/index.html
     command: [nginx-debug, '-g', 'daemon off;']
+    networks:
+      - npm-internal
 
   green:
     image: nginx:stable-alpine
@@ -76,8 +87,10 @@ services:
     volumes:
       - ./nginx/green.html:/usr/share/nginx/html/index.html
     command: [nginx-debug, '-g', 'daemon off;']
+    networks:
+      - npm-internal
 
 networks:
-  default:
-    name: rom_network
+  npm-internal:
+  npm-network:
     external: true
