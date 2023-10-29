@@ -1,0 +1,60 @@
+version: '3'
+services:
+  proxymanger:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: 'proxy-manager'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./proxy-manager/data:/data
+      - ./proxy-manager/letsencrypt:/etc/letsencrypt
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.0.1
+    container_name: keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME_URL: http://admin.meusite.local
+      KC_PROXY: edge
+      KC_LOG_LEVEL: debug
+
+      # OAUTH2_PROXY_PROVIDER: 'oidc'
+      # OAUTH2_PROXY_CLIENT_ID: 'oauth2-proxy'
+      # OAUTH2_PROXY_CLIENT_SECRET: '5ymAvtLNX5RPTH5ZYnG1IvXf3FQ8raNm'
+      # OAUTH2_PROXY_EMAIL_DOMAINS: '*'
+      # OAUTH2_PROXY_OIDC_ISSUER_URL: 'https://auth.meusite.local/realms/master'
+      # OAUTH2_PROXY_REDIRECT_URL: 'https://auth.meusite.local/oauth2/callback'
+    volumes:
+      - ./keycloak:/opt/keycloak/config
+
+    command: [ "start-dev"]
+
+  red:
+    image: nginx:stable-alpine
+    container_name: red
+    volumes:
+      - ./nginx/red.html:/usr/share/nginx/html/index.html
+    command: [nginx-debug, '-g', 'daemon off;']
+
+  blue:
+    image: nginx:stable-alpine
+    container_name: blue
+    volumes:
+      - ./nginx/blue.html:/usr/share/nginx/html/index.html
+    command: [nginx-debug, '-g', 'daemon off;']
+
+  green:
+    image: nginx:stable-alpine
+    container_name: green
+    volumes:
+      - ./nginx/green.html:/usr/share/nginx/html/index.html
+    command: [nginx-debug, '-g', 'daemon off;']
+
+networks:
+  default:
+    name: rom_network
+    external: true
