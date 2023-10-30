@@ -1,0 +1,14 @@
+
+version: "3.3"
+services:
+    portainer:
+      image: portainer/portainer-ce:latest
+      container_name: portainer
+      restart: always
+      privileged: true
+      volumes:
+        - ./data:/data:Z
+        - /var/run/docker.sock:/var/run/docker.sock:Z
+      ports:
+        - 9443:9443
+

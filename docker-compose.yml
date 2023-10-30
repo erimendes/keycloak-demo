@@ -19,7 +19,7 @@ services:
       # Uncomment the line below if IPv6 is not enabled on your host
       # DISABLE_IPV6: 'true'
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      # - ./nginx.conf:/etc/nginx/nginx.conf
       - ./proxy-manager/data:/data
       - ./proxy-manager/letsencrypt:/etc/letsencrypt
     depends_on:
@@ -77,7 +77,7 @@ services:
       - ./nginx/green.html:/usr/share/nginx/html/index.html
     command: [nginx-debug, '-g', 'daemon off;']
 
-# networks:
+networks:
 #   npm-internal:
-#   npm-network:
-#     external: true
+  npm-network:
+    external: true
