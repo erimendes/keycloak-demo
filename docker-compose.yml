@@ -81,3 +81,18 @@ networks:
 #   npm-internal:
   npm-network:
     external: true
+
+# 192.168.15.122       meusite.local
+# 192.168.15.122       admin.meusite.local
+# 192.168.15.122       auth.meusite.local
+# 192.168.15.122       green.meusite.local
+# 192.168.15.122       blue.meusite.local
+# 192.168.15.122       red.meusite.local
+# 192.168.15.122       nodejs.meusite.local
+# 127.0.0.1       meusite.local
+# 127.0.0.1       admin.meusite.local
+# 127.0.0.1       auth.meusite.local
+# 127.0.0.1       green.meusite.local
+# 127.0.0.1       blue.meusite.local
+# 127.0.0.1       red.meusite.local
+# 127.0.0.1       nodejs.meusite.local
