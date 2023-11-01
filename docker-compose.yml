@@ -11,34 +11,31 @@ services:
       # Add any other Stream port you want to expose
       # - '21:21' # FTP
     environment:
-      DB_MYSQL_HOST: "npm-db"
-      DB_MYSQL_PORT: 3306
-      DB_MYSQL_USER: "npm"
-      DB_MYSQL_PASSWORD: ${DB_MYSQL_PASSWORD}
-      DB_MYSQL_NAME: "npm"
+      DB_POSTGRES_HOST: "postgres"
+      DB_POSTGRES_PORT: 5432
+      DB_POSTGRES_USER: "keycloak"
+      DB_POSTGRES_PASSWORD: password
+      DB_POSTGRES_NAME: "keycloak"
       # Uncomment the line below if IPv6 is not enabled on your host
       # DISABLE_IPV6: 'true'
     volumes:
-      # - ./nginx.conf:/etc/nginx/nginx.conf
       - ./proxy-manager/data:/data
       - ./proxy-manager/letsencrypt:/etc/letsencrypt
     depends_on:
-      - npm-db
+      - postgres
   
-  npm-db:
-    image: 'mariadb:latest'
-    container_name: npm-db
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: 'npm'
-      MYSQL_USER: 'npm'
-      MYSQL_PASSWORD: ${DB_MYSQL_PASSWORD}
+  postgres:
+    image: postgres
+    container_name: postgres
     volumes:
-      - ./npm-data/mysql:/var/lib/mysql:Z
+        - ./postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
 
   keycloak:
-    image: quay.io/keycloak/keycloak:21.0.1
+    image: quay.io/keycloak/keycloak:22.0.5
     container_name: keycloak
     environment:
       KEYCLOAK_ADMIN: admin
@@ -46,15 +43,40 @@ services:
       KC_HOSTNAME_URL: http://admin.meusite.local
       KC_PROXY: edge
       KC_LOG_LEVEL: debug
-      # OAUTH2_PROXY_PROVIDER: 'oidc'
-      # OAUTH2_PROXY_CLIENT_ID: 'oauth2-proxy'
-      # OAUTH2_PROXY_CLIENT_SECRET: '5ymAvtLNX5RPTH5ZYnG1IvXf3FQ8raNm'
-      # OAUTH2_PROXY_EMAIL_DOMAINS: '*'
-      # OAUTH2_PROXY_OIDC_ISSUER_URL: 'https://auth.meusite.local/realms/master'
-      # OAUTH2_PROXY_REDIRECT_URL: 'https://auth.meusite.local/oauth2/callback'
+
+      # DB_VENDOR: h2
+
+      # DB_VENDOR: POSTGRES
+      # DB_ADDR: postgres
+      # DB_DATABASE: keycloak
+      # DB_USER: keycloak
+      # DB_SCHEMA: public
+      # DB_PASSWORD: password
+      # KEYCLOAK_USER: user
+      # KEYCLOAK_PASSWORD: Password
+
+      # KEYCLOAK_IMPORT: /opt/keycloak/data/realm.json
+
+      # KC_DB: postgres
+      # KC_DB_SCHEMA: keycloak
+      # KC_DB_USERNAME: keycloak
+      # KC_DB_PASSWORD: password
+      # KC_DB_URL_PORT: 5432
+      # KC_DB_URL_HOST: postgres
+      # KC_DB_URL_DATABASE: keycloak
+
+      OAUTH2_PROXY_PROVIDER: 'oidc'
+      OAUTH2_PROXY_CLIENT_ID: 'oauth2-proxy'
+      OAUTH2_PROXY_CLIENT_SECRET: 'KjIZO1Snn1eg1VdeczL1ZnHkI0JQxhXq'
+      OAUTH2_PROXY_EMAIL_DOMAINS: '*'
+      OAUTH2_PROXY_OIDC_ISSUER_URL: 'https://auth.meusite.local/realms/master'
+      OAUTH2_PROXY_REDIRECT_URL: 'https://auth.meusite.local/oauth2/callback'
     volumes:
       - ./keycloak:/opt/keycloak/config
+      - ./h2/:/opt/keycloak/data/h2/
     command: [ "start-dev"]
+    # depends_on:
+    #     - postgres
 
   red:
     image: nginx:stable-alpine
@@ -79,20 +101,5 @@ services:
 
 networks:
 #   npm-internal:
-  npm-network:
+  rom_network:
     external: true
-
-# 192.168.15.122       meusite.local
-# 192.168.15.122       admin.meusite.local
-# 192.168.15.122       auth.meusite.local
-# 192.168.15.122       green.meusite.local
-# 192.168.15.122       blue.meusite.local
-# 192.168.15.122       red.meusite.local
-# 192.168.15.122       nodejs.meusite.local
-# 127.0.0.1       meusite.local
-# 127.0.0.1       admin.meusite.local
-# 127.0.0.1       auth.meusite.local
-# 127.0.0.1       green.meusite.local
-# 127.0.0.1       blue.meusite.local
-# 127.0.0.1       red.meusite.local
-# 127.0.0.1       nodejs.meusite.local
