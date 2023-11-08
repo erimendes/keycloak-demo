@@ -4,14 +4,26 @@
   "description": "Example page that demonstrates available keycloak functionality",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "build": "npx tsc",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Roman Jurkov <winfinit@gmail.com>",
+  "author": "",
   "license": "Apache-2.0",
   "dependencies": {
     "express": "*",
     "express-session": "*",
     "hogan-express": "*",
-    "keycloak-connect": "file:.."
+    "keycloak-connect": "^22.0.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.15",
+    "@types/express": "^4.17.20",
+    "@types/express-session": "^1.17.9",
+    "eslint": "^8.53.0",
+    "nodemon": "^3.0.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.2.2"
   }
 }

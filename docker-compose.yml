@@ -5,78 +5,30 @@ services:
     container_name: 'proxy-manager'
     restart: unless-stopped
     ports:
-      - '80:80' # Public HTTP Port
-      - '443:443' # Public HTTPS Port
-      - '81:81' # Admin Web Port
-      # Add any other Stream port you want to expose
-      # - '21:21' # FTP
-    environment:
-      DB_POSTGRES_HOST: "postgres"
-      DB_POSTGRES_PORT: 5432
-      DB_POSTGRES_USER: "keycloak"
-      DB_POSTGRES_PASSWORD: password
-      DB_POSTGRES_NAME: "keycloak"
-      # Uncomment the line below if IPv6 is not enabled on your host
-      # DISABLE_IPV6: 'true'
+      - '80:80'
+      - '81:81'
+      - '443:443'
     volumes:
       - ./proxy-manager/data:/data
       - ./proxy-manager/letsencrypt:/etc/letsencrypt
-    depends_on:
-      - postgres
-  
-  postgres:
-    image: postgres
-    container_name: postgres
-    volumes:
-        - ./postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password
 
   keycloak:
-    image: quay.io/keycloak/keycloak:22.0.5
+    image: keycloak/keycloak:latest
     container_name: keycloak
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HOSTNAME_URL: http://admin.meusite.local
       KC_PROXY: edge
-      KC_LOG_LEVEL: debug
+      KC_HOSTNAME_STRICT: false
+      KEYCLOAK_HTTP_PORT: 8080
+      PROXY_ADDRESS_FORWARDING: true
 
-      # DB_VENDOR: h2
-
-      # DB_VENDOR: POSTGRES
-      # DB_ADDR: postgres
-      # DB_DATABASE: keycloak
-      # DB_USER: keycloak
-      # DB_SCHEMA: public
-      # DB_PASSWORD: password
-      # KEYCLOAK_USER: user
-      # KEYCLOAK_PASSWORD: Password
-
-      # KEYCLOAK_IMPORT: /opt/keycloak/data/realm.json
-
-      # KC_DB: postgres
-      # KC_DB_SCHEMA: keycloak
-      # KC_DB_USERNAME: keycloak
-      # KC_DB_PASSWORD: password
-      # KC_DB_URL_PORT: 5432
-      # KC_DB_URL_HOST: postgres
-      # KC_DB_URL_DATABASE: keycloak
-
-      OAUTH2_PROXY_PROVIDER: 'oidc'
-      OAUTH2_PROXY_CLIENT_ID: 'oauth2-proxy'
-      OAUTH2_PROXY_CLIENT_SECRET: 'KjIZO1Snn1eg1VdeczL1ZnHkI0JQxhXq'
-      OAUTH2_PROXY_EMAIL_DOMAINS: '*'
-      OAUTH2_PROXY_OIDC_ISSUER_URL: 'https://auth.meusite.local/realms/master'
-      OAUTH2_PROXY_REDIRECT_URL: 'https://auth.meusite.local/oauth2/callback'
+    ports:
+      - '8080:8080'
     volumes:
-      - ./keycloak:/opt/keycloak/config
       - ./h2/:/opt/keycloak/data/h2/
+      - ./keycloak/data:/opt/keycloak/data
     command: [ "start-dev"]
-    # depends_on:
-    #     - postgres
 
   red:
     image: nginx:stable-alpine
@@ -88,6 +40,8 @@ services:
   blue:
     image: nginx:stable-alpine
     container_name: blue
+    ports:
+      - '4080:80'
     volumes:
       - ./nginx/blue.html:/usr/share/nginx/html/index.html
     command: [nginx-debug, '-g', 'daemon off;']
@@ -100,6 +54,6 @@ services:
     command: [nginx-debug, '-g', 'daemon off;']
 
 networks:
-#   npm-internal:
-  rom_network:
+  default:
+    name: rom_network
     external: true

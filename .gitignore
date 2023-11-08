@@ -2,3 +2,6 @@
 images
 proxy-manager
 keycloak
+nginx.conf
+example/node_modules
+example/package-lock.json
